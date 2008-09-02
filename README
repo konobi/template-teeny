@@ -1,0 +1,40 @@
+Template-Teeny
+
+INSTALLATION
+
+To install this module, run the following commands:
+
+	perl Makefile.PL
+	make
+	make test
+	make install
+
+SUPPORT AND DOCUMENTATION
+
+After installing, you can find documentation for this module with the
+perldoc command.
+
+    perldoc Template::Teeny
+
+You can also look for information at:
+
+    RT, CPAN's request tracker
+        http://rt.cpan.org/NoAuth/Bugs.html?Dist=Template-Teeny
+
+    AnnoCPAN, Annotated CPAN documentation
+        http://annocpan.org/dist/Template-Teeny
+
+    CPAN Ratings
+        http://cpanratings.perl.org/d/Template-Teeny
+
+    Search CPAN
+        http://search.cpan.org/dist/Template-Teeny
+
+
+COPYRIGHT AND LICENCE
+
+Copyright (C) 2008 Scott McWhirter
+
+Please see the enclosed LICENSE file for full details of this softwares license. This
+software is released under the 3-clause BSD license.
+
