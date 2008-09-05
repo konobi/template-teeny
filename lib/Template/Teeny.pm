@@ -10,33 +10,46 @@ has directory => (
     default => sub { [qw(.)] },
 );
 
-my ($START,$END) = map { "\Q$_\E" } qw([% %]);
-my $CHUNKS = qr{
-    (.+)?
-    ($START (?:[^%\]]+) $END)
-    (.+)?
+my ($START,$END) = map { qr{\Q$_\E} } qw([% %]);
+my $DECLARATION = qr{$START (?:.+?) $END}x;
+my $TEXT = qr{
+    (?:\A|(?<=$END))    # Start matching from the start of the file or end of a declaration
+        .*?                 # everything in between
+    (?:\Z|(?=$START))   # Finish at the end of the file or start of another declaration
 }msx;
-my $NAME = qr{(?:[^%\s]+)};
+my $CHUNKS = qr{
+    ($TEXT)?
+    ($DECLARATION)?
+}msx;
 
-my $SECTION = qr{SECTION\s+($NAME)};
-my $INCLUDE = qr{INCLUDE\s+($NAME)};
+my $IDENT = qr{
+    [a-z][a-z0-9_]+ # any alphanumeric characters and underscores, but must start
+                    # with a letter; everything must be lower case
+}x;
+
+my $SECTION = qr{
+    SECTION \s+ ($IDENT)
+}x;
+my $INCLUDE = qr{
+    INCLUDE \s+ ["']? ([^"']+) ["']?
+}x;
 
 my $VARS = qr{
-    (?:
-        \s*
-        (?:\|)?
-        \s*
-    )
-    ([a-z0-9][a-z0-9_]+)
-}msx;
+    (?: \s* \| \s* )?
+    ( $IDENT )
+}x;
 
 my $DIRECTIVE = qr{
     $START
-        \s*
-        (END|$SECTION|$INCLUDE|(?:[a-z0-9_\s\|]+))
-        \s*
+        \s*?
+        (END
+            | $SECTION
+            | $INCLUDE
+            | [a-z0-9_\s\|]+
+        )
+        \s*?
     $END
-}msx;
+}x;
 
 sub parse {
     my ($self, $tpl) = @_;
@@ -63,6 +76,39 @@ sub parse {
 
     return [@AST];
 }
+
+=for AST_example
+
+    #hehehe sucka [% name | escape_html %]
+    #        [% SECTION foo %] [%hehe%] [% END %]
+
+    $AST = [
+        [ 'TEXT', 'hehehe sucka ' ],
+        [ 'VARS', [ 'name', 'escape_html' ] ],
+        [ 'TEXT', "\n        " ],
+        [ 'SECTION', 'foo' ],
+        [ 'TEXT', ' ' ],
+        [ 'VARS', [ 'hehe' ] ],
+        [ 'TEXT', ' ' ],
+        [ 'END' ],
+        [ 'VARS', 'bob']
+    ];
+
+    my ($dict) = @_;
+    my $output = '';
+    $output .= 'hehehe sucka ';
+    $output .= escape_html( $dict->get_var('name') );
+    $output .= "\n        ";
+    for my $sdict ( $dict->get_sections('foo') ) {
+        $output .= ' ';
+        $output .= $sdict->get_var('hehe');
+        $output .= ' ';
+    }
+    $output .= $dict->get_var('bob');
+
+=cut
+
+
 
 =for comment
 
