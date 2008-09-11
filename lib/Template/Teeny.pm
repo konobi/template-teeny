@@ -132,6 +132,8 @@ sub compile {
     return $code;
 }
 
+
+my $compiled_tpls = {};
 sub process {
     my ($self, $tpl, $stash) = @_;
 
@@ -140,11 +142,14 @@ sub process {
         $tpl_str .= $self->_get_tpl_str($tpl);
     }
 
-    my $AST = $self->parse($tpl_str);
-    my $code_str = $self->compile($AST);
+    # XXX - This should really take the full name
+    my $compile = $compiled_tpls->{ $tpl } ||= do {
+        my $AST = $self->parse($tpl_str);
+        my $code_str = $self->compile($AST);
 
-    my $coderef = eval($code_str) or die "Could not compile template: $@";
-    return $coderef->($stash);
+        my $coderef = eval($code_str) or die "Could not compile template: $@";
+    };
+    return $compile->($stash);
 }
 
 sub _get_tpl_str {
