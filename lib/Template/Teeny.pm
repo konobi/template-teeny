@@ -176,6 +176,10 @@ sub _get_tpl_str {
     return $tpl_str;
 }
 
+1;
+
+__END__
+
 =head1 NAME
 
 Template::Teeny - Teeny-weeny templating system
@@ -190,12 +194,90 @@ our $VERSION = '0.00_001';
 
 =head1 SYNOPSIS
 
-
     use Template::Teeny;
 
-    my $tt = Template::Teeny->new();
-    ...
-# XXX TODO add more here
+    my $tt = Template::Teeny->new({
+        directory => ['foo/templates']    
+    });
+
+    my $stash = Template::Teeny->new({
+        vars => { a => 1, b => 2, c => 3 }    
+    });
+
+    $stash->add_section('items', $item1);
+    $stash->add_section('items', $item2);
+
+    $tt->process('foo.html', $stash);
+
+=head1 DESCRIPTION
+
+Template::Teeny is a more perlish implementation of the concepts in googles
+ctemplate library. The template syntax does not have any conditionals or
+looping directly.
+
+A basic template would look like so:
+
+    Hi [% name %],
+
+    You ordered the following:
+    [% SECTION items %]
+        Title: [% title %]
+        Date: [% date %]
+        Identifier: [% id | uc %]
+
+        [% INCLUDE 'full_description.txt' %]
+
+    [% END %]
+
+When processing the template, we supply a stash object which contains all the
+variables for processing.
+
+=over
+
+=item [% name %]
+
+This pulls variables directly from the current stash.
+
+=item [% SECTION items %]
+
+The current stash may have other stashes associated with it by name
+
+  $stash->add_section('foo', $other_stash);
+
+This would then would run the SECTION block with $other_stash as its
+stash.
+
+=item [% id | uc %]
+
+TODO - This still need implemented
+
+This is a variable which will be run through the filter 'uc' before being
+output. These filters can be chained.
+
+=item [% INCLUDE 'full_description.txt %]
+
+This will pull in the template from the file 'full_description.txt'
+
+=item [% END %]
+
+This simply marks the end of a section.
+
+=back
+
+=head2 Why yet another templating system?
+
+There are a multitude of different templating systems out there, so what
+makes this one so different? The aim of this system is to move all business
+logic out of the templates and back into the code where it belongs. This
+means that the templating becomes very lightweight and fast.
+
+The Google CTemplate library is a great example of this approach, however I
+had attempted to bind this to perl and unfortunately was unable to make it
+work correctly enough for production use.
+
+I aim to have a fully working perl version and further down the line
+implement a full C version with XS bindings. Other than that, I wanted to
+have a try at writing parsers/compilers for fun.
 
 =head1 METHODS
 
@@ -250,10 +332,6 @@ L<http://search.cpan.org/dist/Template-Teeny>
 
 =back
 
-
-=head1 ACKNOWLEDGEMENTS
-
-
 =head1 COPYRIGHT & LICENSE
 
 Copyright 2008 Scott McWhirter, all rights reserved.
@@ -261,5 +339,3 @@ Copyright 2008 Scott McWhirter, all rights reserved.
 This program is released under the following license: BSD
 
 =cut
-
-1;
