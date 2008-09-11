@@ -11,57 +11,58 @@ use_ok('Template::Teeny');
 my ($start,$end);
 {
     # Make it easier to test!
-    $start = $Template::Teeny::CODE_START = "\n# <start>\n";
+    $start = $Template::Teeny::CODE_START = "# <start>\n";
     $end   = $Template::Teeny::CODE_END   = "# <end>\n";
 }
 
 my $tt = Template::Teeny->new();
 
 basic_text: {
-    my $str = $tt->compile({
-        AST => [ [ TEXT => 'Hello one and all' ] ],
-    });
+    my $str = $tt->compile(
+        [[ TEXT => 'Hello one and all' ]],
+    );
 
-    my $expected = q{
+    my $expected = <<'END';
 # <start>
   $output .= 'Hello one and all';
 # <end>
-};
+END
+
     is $str, $expected, q{Basic Text works};
 }
 
 basic_var: {
-    my $str = $tt->compile({
-        AST => [[ VARS => [qw(albert)] ]],
-    });
+    my $str = $tt->compile(
+        [[ VARS => [qw(albert)] ]],
+    );
 
-    my $expected = q{
+    my $expected = <<'END';
 # <start>
   $output .= $stash_a->get(qw(albert));
 # <end>
-};
+END
 
     is $str, $expected, q{Basic Variable works};
 }
 
 basic_section: {
-    my $str = $tt->compile({
-        AST => [[ SECTION => "blog" ], [ 'END' ]],
-    });
+    my $str = $tt->compile(
+        [[ SECTION => "blog" ], [ 'END' ]],
+    );
     
-    my $expected = q{
+    my $expected = <<'END';
 # <start>
   for my $stash_b ( $stash_a->sections('blog') ) {
   }
 # <end>
-};
+END
 
     is $str, $expected, q{Basic Section works};
 }
 
 complex: {
-    my $str = $tt->compile({
-        AST => [
+    my $str = $tt->compile(
+        [
             [TEXT => 'hehehe sucka '],
             [VARS => [qw(name escape_html)]],
             [TEXT => "\n        "],
@@ -71,9 +72,9 @@ complex: {
             [TEXT => ' '],
             ['END'],
         ],
-    });
+    );
 
-    my $expected = q{
+    my $expected = <<'END';
 # <start>
   $output .= 'hehehe sucka ';
   $output .= $stash_a->get(qw(name escape_html));
@@ -85,15 +86,12 @@ complex: {
   $output .= ' ';
   }
 # <end>
-};
+END
 
     is $str, $expected, q{Complex example works};
 }
 
-
-exit;
-
+#---------------------------------------------------
 $Template::Teeny::CODE_START = undef;
 $Template::Teeny::CODE_END = undef;
-
 

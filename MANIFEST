@@ -18,7 +18,9 @@ MANIFEST.SKIP
 META.yml
 README
 t/01-basic.t
+t/02-dict.t
+t/03-compile.t
 t/04-parse.t
-t/boilerplate.t
+t/05-process.t
 t/pod-coverage.t
 t/pod.t

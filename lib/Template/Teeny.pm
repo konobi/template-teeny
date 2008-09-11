@@ -1,7 +1,14 @@
 package Template::Teeny;
 
-our $CODE_START;
-our $CODE_END;
+our $CODE_START = <<'END';
+sub {
+    my ($stash_a) = @_;
+    my $output = '';
+END
+
+our $CODE_END = <<'END';
+}
+END
 
 use Moose;
 
@@ -80,47 +87,16 @@ sub parse {
     return [@AST];
 }
 
-=for AST_example
-
-    #hehehe sucka [% name | escape_html %]
-    #        [% SECTION foo %] [%hehe%] [% END %]
-
-    $AST = [
-        [ 'TEXT', 'hehehe sucka ' ],
-        [ 'VARS', [ 'name', 'escape_html' ] ],
-        [ 'TEXT', "\n        " ],
-        [ 'SECTION', 'foo' ],
-        [ 'TEXT', ' ' ],
-        [ 'VARS', [ 'hehe' ] ],
-        [ 'TEXT', ' ' ],
-        [ 'END' ],
-        [ 'VARS', 'bob']
-    ];
-
-    my ($dict) = @_;
-    my $output = '';
-    $output .= 'hehehe sucka ';
-    $output .= escape_html( $dict->get_var('name') );
-    $output .= "\n        ";
-    for my $sdict ( $dict->get_sections('foo') ) {
-        $output .= ' ';
-        $output .= $sdict->get_var('hehe');
-        $output .= ' ';
-    }
-    $output .= $dict->get_var('bob');
-
-=cut
-
-
 sub compile {
-    my ($self, $opts) = @_;
+    my ($self, $AST) = @_;
 
-    my $AST  = $opts->{AST} or die "No AST to compile";
-    my $dict = $opts->{dict};
+    my $current_level ||= 0;
 
-    my $code = $CODE_START;
+    my $code = '';
+    if(!$current_level){
+        $code .= $CODE_START;
+    }
 
-    my $current_level = 0;
     my @names = ('a'..'z');
 
     while(my $item = shift @$AST){
@@ -150,8 +126,49 @@ sub compile {
         }
     }
 
-    $code .= $CODE_END;
+    if(!$current_level){
+        $code .= $CODE_END;
+    }
     return $code;
+}
+
+sub process {
+    my ($self, $tpl, $stash) = @_;
+
+    my $tpl_str = '';
+    if(!ref $tpl){
+        $tpl_str .= $self->_get_tpl_str($tpl);
+    }
+
+    my $AST = $self->parse($tpl_str);
+    my $code_str = $self->compile($AST);
+
+    my $coderef = eval($code_str) or die "Could not compile template: $@";
+    return $coderef->($stash);
+}
+
+sub _get_tpl_str {
+    my ($self, $tpl) = @_;
+
+    my $tpl_str = '';
+    my @dirs_to_try = @{ $self->directory };
+
+    my $file;
+    while(my $dir = shift @dirs_to_try){
+        my $tmp = $dir . '/' . $tpl;
+        if(-e $tmp){
+            $file = $tmp;
+            last;
+        }
+    }
+    
+    die "Could not find $tpl" if(!$file);
+
+    open my $fh, $file or die "Could not open '$file': $!";
+    $tpl_str .= do { local $/; <$fh>; };
+    close $fh or die "Could not close '$file': $!";
+
+    return $tpl_str;
 }
 
 =head1 NAME
@@ -177,11 +194,24 @@ our $VERSION = '0.00_001';
 
 =head1 METHODS
 
+=head2 process
+
+    $tt->process('foo/bar/baz.tpl', $stash);
+
+This method takes a template file name and a stash object to be processed.
+
 =head2 parse
 
     $tt->parse('[% foo %]');
 
 Takes a string representing the template. Returns an AST.
+
+=head2 compile
+
+    my $eval_string = $tt->compile( ...<AST>... );
+
+This method take a generated AST and translates it into an eval-able
+string of perl code.
 
 =head1 AUTHOR
 
