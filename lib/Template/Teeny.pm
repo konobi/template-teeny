@@ -1,5 +1,8 @@
 package Template::Teeny;
 
+our $CODE_START;
+our $CODE_END;
+
 use Moose;
 
 has directory => (
@@ -109,69 +112,47 @@ sub parse {
 =cut
 
 
+sub compile {
+    my ($self, $opts) = @_;
 
-=for comment
+    my $AST  = $opts->{AST} or die "No AST to compile";
+    my $dict = $opts->{dict};
 
-sub process {
-    my ($self, $tmpl, $vars) = @_;
+    my $code = $CODE_START;
 
-    my $cb = sub { die "Could not get real template" };
+    my $current_level = 0;
+    my @names = ('a'..'z');
 
-    if(ref($tmpl) eq 'SCALAR'){
-         $cb = $self->_codify($tmpl);
-    }
+    while(my $item = shift @$AST){
+        my ($type, $val) = @$item;
 
-    print $cb->($vars);
-}
-
-sub _codify {
-    my ($self, $tpl) = @_;
-    my @AST = @{ $self->parse($tpl) };
-
-    my $code = <<'END';
-    my $VAR = sub {
-        my ($vars) = @_;
-        my $output = '';
-        my $foo = $vars;
-END
-    while(my $item = shift @AST){
-        my ($type,$stuff) = @$item; 
         if($type eq 'TEXT'){
-            my $text = quotemeta($stuff);
-            $code .= qq{
-                \$output .= "$text";
-            };
-        }elsif($type eq 'SECTION'){
-            $code .= qq!
-                # Start of SECTION $stuff
-                \$foo = \$vars->{'*$stuff'};
-                for my \$ick (\@\$foo){
-                    my \$old_foo = \$foo;
-                    \$foo = \$ick;
-            !;
-        }elsif($type eq 'END'){
-            $code .= q!
-                    $foo = $old_foo;
-                }
-            !;
-        }elsif($type eq 'VARS'){
-            unless(@$stuff > 2){
-                $code .= qq{
-                    \$output .= \$foo->{ $stuff->[0] };
-                };
-            }
+            $code .= q{  $output .= '}.$val.qq{';\n};
+
+        } elsif ($type eq 'VARS') {
+            $code .= q{  $output .= $stash_} 
+                    . $names[$current_level] 
+                    . q{->get(qw(} 
+                    . join(' ', @$val)
+                    . qq{));\n};
+
+        } elsif ($type eq 'END'){ 
+            $code .= "  }\n";
+            $current_level--;
+
+        } elsif ($type eq 'SECTION') {
+            my $old = $names[$current_level];
+            my $new = $names[++$current_level];
+
+            $code .= "  for my \$stash_$new ( \$stash_$old\->sections('$val') ) {\n";
+        } else {
+            die "Could not understand type '$type'";
         }
     }
-    $code .= <<'END';
-        return $output;
-    }
-END
 
-    my $cb = eval "$code" or die "erk: $@";
-    return $cb;
+    $code .= $CODE_END;
+    return $code;
 }
-
-=cut
 
 =head1 NAME
 

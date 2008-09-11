@@ -24,7 +24,6 @@ basic_plus_text: {
 }
 
 basic_end_text: {
-#    local $TODO = q{Need to work on the parser};
     check(
         q{[% one_two %] bubba},
         [ [VARS => [qw(one_two)] ], [TEXT => ' bubba'] ],
