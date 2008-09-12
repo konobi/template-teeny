@@ -15,7 +15,7 @@ sub add_section {
 # XXX - add ability to deal with filters here
 sub get { 
     # All values return are always strings
-    "" . $_[0]->vars->{$_[1]}; 
+    "" . ( $_[0]->vars->{$_[1]} || '' ); 
 }
 
 =head1 NAME

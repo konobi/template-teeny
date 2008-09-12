@@ -5,6 +5,7 @@ use warnings;
 
 use Test::More tests => 4;
 use Test::Differences;
+use IO::Scalar;
 
 use_ok('Template::Teeny');
 use_ok('Template::Teeny::Stash');
@@ -18,7 +19,9 @@ basic: {
         directory => [q{t/tpl}],
     });
 
-    my $out = $tt->process('foo.tpl', $stash);
+    
+    my $io = IO::Scalar->new(\(my $out));
+    $tt->process('foo.tpl', $stash, $io);
     my $expected = <<'END';
 
 Hi Perl Hacker,
@@ -46,7 +49,8 @@ nested_sections: {
         directory => [q{t/tpl}],
     });
 
-    my $out = $tt->process('nested.tpl', $stash);
+    my $io = IO::Scalar->new(\(my $out));
+    $tt->process('nested.tpl', $stash, $io);
     my $expected = <<'END';
 <html>
   <head><title>Howdy Charlie</title></head>

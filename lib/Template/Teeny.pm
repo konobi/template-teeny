@@ -2,8 +2,7 @@ package Template::Teeny;
 
 our $CODE_START = <<'END';
 sub {
-    my ($stash_a) = @_;
-    my $output = '';
+    my ($stash_a, $out) = @_;
 END
 
 our $CODE_END = <<'END';
@@ -103,10 +102,10 @@ sub compile {
         my ($type, $val) = @$item;
 
         if($type eq 'TEXT'){
-            $code .= q{  $output .= '}.$val.qq{';\n};
+            $code .= q{  print {$out} '}.$val.qq{';\n};
 
         } elsif ($type eq 'VARS') {
-            $code .= q{  $output .= $stash_} 
+            $code .= q{  print {$out} $stash_} 
                     . $names[$current_level] 
                     . q{->get(qw(} 
                     . join(' ', @$val)
@@ -135,7 +134,11 @@ sub compile {
 
 my $compiled_tpls = {};
 sub process {
-    my ($self, $tpl, $stash) = @_;
+    my ($self, $tpl, $stash, $fh) = @_;
+
+    if(!$fh){
+        $fh = \*STDOUT;
+    }
 
     my $tpl_str = '';
     if(!ref $tpl){
@@ -149,7 +152,9 @@ sub process {
 
         my $coderef = eval($code_str) or die "Could not compile template: $@";
     };
-    return $compile->($stash);
+    $compile->($stash, $fh);
+
+    return;
 }
 
 sub _get_tpl_str {

@@ -24,7 +24,7 @@ basic_text: {
 
     my $expected = <<'END';
 # <start>
-  $output .= 'Hello one and all';
+  print {$out} 'Hello one and all';
 # <end>
 END
 
@@ -38,7 +38,7 @@ basic_var: {
 
     my $expected = <<'END';
 # <start>
-  $output .= $stash_a->get(qw(albert));
+  print {$out} $stash_a->get(qw(albert));
 # <end>
 END
 
@@ -76,14 +76,14 @@ complex: {
 
     my $expected = <<'END';
 # <start>
-  $output .= 'hehehe sucka ';
-  $output .= $stash_a->get(qw(name escape_html));
-  $output .= '
+  print {$out} 'hehehe sucka ';
+  print {$out} $stash_a->get(qw(name escape_html));
+  print {$out} '
         ';
   for my $stash_b ( $stash_a->sections('foo') ) {
-  $output .= ' ';
-  $output .= $stash_b->get(qw(hehe));
-  $output .= ' ';
+  print {$out} ' ';
+  print {$out} $stash_b->get(qw(hehe));
+  print {$out} ' ';
   }
 # <end>
 END
