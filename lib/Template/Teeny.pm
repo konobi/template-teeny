@@ -86,6 +86,39 @@ sub parse {
     return [@AST];
 }
 
+# XXX - Tests should be added for this
+sub _optimize {
+    my (undef, $AST) = @_;
+
+    my @OPT;
+
+    while (my $item = shift @$AST){
+        my ($type, $val) = @$item;
+
+        if($type eq 'TEXT' || $type eq 'VARS'){
+            my @long = ($item);
+           
+            # lets see what the next statement is to see if we can concat
+            while( $AST->[0] && ($AST->[0][0] eq 'TEXT' || $AST->[0][0] eq 'VARS') ){
+
+                # move this 
+                push @long, shift @$AST;
+            }
+
+            # if there's only one statement, not much point in concat-ing.
+            if(@long > 1){
+                @long = [ CONCAT => [@long] ];
+            }
+
+            push @OPT, @long;
+        } else {
+            push @OPT, $item;
+        }
+    }
+
+    return [@OPT];
+}
+
 sub compile {
     my ($self, $AST) = @_;
 
@@ -120,6 +153,35 @@ sub compile {
             my $new = $names[++$current_level];
 
             $code .= "  for my \$stash_$new ( \$stash_$old\->sections('$val') ) {\n";
+        } elsif ($type eq 'CONCAT') {
+            my ($t,$v) = @{ shift @$val };
+
+            if($t eq 'TEXT'){
+                $code .= q{  print {$out} '}.$v.qq{'\n};
+            }elsif($t eq 'VARS'){
+                $code .= q{  print {$out} $stash_} 
+                        . $names[$current_level] 
+                        . q{->get(qw(} 
+                        . join(' ', @$v)
+                        . qq{))};
+            }
+
+            for my $concat (@$val){
+                my ($ct,$cv) = @$concat;
+                
+                if($ct eq 'TEXT'){
+                    $code .= qq{\n    . '}.$cv.q{'};
+                }elsif($ct eq 'VARS'){
+                    $code .= qq{\n    . \$stash_} 
+                            . $names[$current_level] 
+                            . q{->get(qw(} 
+                            . join(' ', @$cv)
+                            . qq{))};
+                }
+            }
+
+            $code .= ";\n";
+
         } else {
             die "Could not understand type '$type'";
         }
@@ -128,6 +190,7 @@ sub compile {
     if(!$current_level){
         $code .= $CODE_END;
     }
+
     return $code;
 }
 
@@ -148,6 +211,7 @@ sub process {
     # XXX - This should really take the full name
     my $compile = $compiled_tpls->{ $tpl } ||= do {
         my $AST = $self->parse($tpl_str);
+        $AST = $self->_optimize($AST);
         my $code_str = $self->compile($AST);
 
         my $coderef = eval($code_str) or die "Could not compile template: $@";

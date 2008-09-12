@@ -16,6 +16,9 @@ my $t = Template->new({ INCLUDE_PATH => 't/tpl', COMPILE_EXT => '.tc' });
 my $out;
 open my $fh, '>/dev/null';
 
+$tt->process('bench.tpl', $stash, $fh);
+$t->process('bench.tpl', { name => 'bob' }, $fh);
+
 sub teeny {
     $tt->process('bench.tpl', $stash, $fh);
 }
