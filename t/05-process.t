@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 4;
+use Test::More tests => 5;
 use Test::Differences;
 use IO::Scalar;
 
@@ -73,3 +73,24 @@ END
 
     eq_or_diff $out, $expected, q{More complex example};
 }
+
+horror: {    
+    my $stash = Template::Teeny::Stash->new({
+        vars => { name => 'Perl Hacker' }
+    });
+
+    my $tt = Template::Teeny->new({
+        directory => [q{t/tpl}],
+    });
+
+    my $io = IO::Scalar->new(\(my $out));
+    $tt->process('horror.tpl', $stash, $io);
+    my $expected = <<'END';
+
+~`@#$%^&*()-_=+{[]}\|;:"'<,.>?/
+
+Perl Hacker
+END
+    is $out, $expected, q{Horror process};
+}
+

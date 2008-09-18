@@ -18,6 +18,11 @@ sub get {
     "" . ( $_[0]->vars->{$_[1]} || '' ); 
 }
 
+__PACKAGE__->meta->make_immutable();
+1;
+
+__END__
+
 =head1 NAME
 
 Template::Teeny::Stash - Object containing stashed variables
@@ -65,4 +70,3 @@ This returns the stashes that have been added to the named section.
 
 =cut
 
-1;

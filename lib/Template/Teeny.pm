@@ -135,6 +135,7 @@ sub compile {
         my ($type, $val) = @$item;
 
         if($type eq 'TEXT'){
+            $val =~ s{'}{\\'};
             $code .= q{  print {$out} '}.$val.qq{';\n};
 
         } elsif ($type eq 'VARS') {
@@ -157,6 +158,7 @@ sub compile {
             my ($t,$v) = @{ shift @$val };
 
             if($t eq 'TEXT'){
+                $v =~ s{'}{\\'};
                 $code .= q{  print {$out} '}.$v.qq{'\n};
             }elsif($t eq 'VARS'){
                 $code .= q{  print {$out} $stash_} 
@@ -170,6 +172,7 @@ sub compile {
                 my ($ct,$cv) = @$concat;
                 
                 if($ct eq 'TEXT'){
+                    $cv =~ s{'}{\\'};
                     $code .= qq{\n    . '}.$cv.q{'};
                 }elsif($ct eq 'VARS'){
                     $code .= qq{\n    . \$stash_} 
