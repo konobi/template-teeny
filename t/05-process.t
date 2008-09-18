@@ -12,7 +12,7 @@ use_ok('Template::Teeny::Stash');
 
 basic: {
     my $stash = Template::Teeny::Stash->new({
-        vars => { name => 'Perl Hacker', title => 'paper' }
+        name => 'Perl Hacker', title => 'paper',
     });
 
     my $tt = Template::Teeny->new({
@@ -34,11 +34,11 @@ END
 
 nested_sections: {
     my $stash = Template::Teeny::Stash->new({
-        vars => { name => 'Charlie', interest => 'movies' }
+        name => 'Charlie', interest => 'movies',
     });
 
-    my $item1 = Template::Teeny::Stash->new({ vars => { item => 'Happy Gilmore' } });
-    my $item2 = Template::Teeny::Stash->new({ vars => { item => 'Care Bears' } });
+    my $item1 = Template::Teeny::Stash->new({ item => 'Happy Gilmore' });
+    my $item2 = Template::Teeny::Stash->new({ item => 'Care Bears' });
     
     $stash->add_section('items', $item1);
     $stash->add_section('items', $item2);
@@ -76,7 +76,7 @@ END
 
 horror: {    
     my $stash = Template::Teeny::Stash->new({
-        vars => { name => 'Perl Hacker' }
+        name => 'Perl Hacker',
     });
 
     my $tt = Template::Teeny->new({

@@ -273,7 +273,7 @@ our $VERSION = '0.00_001';
     });
 
     my $stash = Template::Teeny->new({
-        vars => { a => 1, b => 2, c => 3 }    
+        a => 1, b => 2, c => 3
     });
 
     $stash->add_section('items', $item1);
@@ -327,6 +327,8 @@ This is a variable which will be run through the filter 'uc' before being
 output. These filters can be chained.
 
 =item [% INCLUDE 'full_description.txt %]
+
+TODO - This still need implemented
 
 This will pull in the template from the file 'full_description.txt'
 

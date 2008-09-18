@@ -6,10 +6,13 @@ use Moose::Util::TypeConstraints;
 has vars => (is => 'rw', isa => 'HashRef', default => sub { {} });
 has _sections => (is => 'rw', isa => 'HashRef[ArrayRef[Template::Teeny::Stash]]', default => sub { {} });
 
+sub BUILDARGS { return { vars => ($_[1]||{}) }; }
+
 sub sections { @{ $_[0]->_sections->{$_[1]} || [] }; }
-sub add_section { 
-    $_[0]->_sections->{$_[1]} ||= [];
-    push @{ $_[0]->_sections->{$_[1]} }, $_[2]; 
+sub add_section {
+    my ($self,$sec,@stashes) = @_;
+    $self->_sections->{$sec} ||= [];
+    push @{ $self->_sections->{$sec} }, (@stashes ? @stashes : undef); 
 }
 
 # XXX - add ability to deal with filters here
@@ -30,10 +33,8 @@ Template::Teeny::Stash - Object containing stashed variables
 =head1 SYNOPSIS
 
     my $stash = Template::Teeny::Stash->new({
-        vars => {
-            a => 1,
-            ...
-        }
+        a => 1,
+        ...
     });
 
     $stash->add_section('section_foo', $other_stash);
@@ -48,7 +49,7 @@ Basic constructor
 
 =head2 get
 
-# TODO Add filter support
+ # TODO Add filter support
 
   $stash->get('variable1');
 
@@ -66,7 +67,9 @@ This adds a stash to the named section.
 
 This returns the stashes that have been added to the named section.
 
+=head2 BUILDARGS
 
+This is a moose thang.
 
 =cut
 
