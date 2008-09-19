@@ -16,7 +16,7 @@ basic: {
     });
 
     my $tt = Template::Teeny->new({
-        directory => [q{t/tpl}],
+        include_path => [q{t/tpl}],
     });
 
     
@@ -46,7 +46,7 @@ nested_sections: {
     $stash->add_section('possible_geek');
 
     my $tt = Template::Teeny->new({
-        directory => [q{t/tpl}],
+        include_path => [q{t/tpl}],
     });
 
     my $io = IO::Scalar->new(\(my $out));
@@ -80,7 +80,7 @@ horror: {
     });
 
     my $tt = Template::Teeny->new({
-        directory => [q{t/tpl}],
+        include_path => [q{t/tpl}],
     });
 
     my $io = IO::Scalar->new(\(my $out));

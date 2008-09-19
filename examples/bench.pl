@@ -9,7 +9,7 @@ use Template;
 
 use Benchmark qw(:hireswallclock cmpthese);
 basic: {
-    my $tt = Template::Teeny->new({ directory => ['t/tpl'] });
+    my $tt = Template::Teeny->new({ include_path => ['t/tpl'] });
     my $stash = Template::Teeny::Stash->new({ name => 'bob' });
 
     my $t = Template->new({ INCLUDE_PATH => 't/tpl', COMPILE_EXT => '.tc' });
@@ -31,7 +31,7 @@ basic: {
 }
 
 some_looping_etc: {
-    my $tt = Template::Teeny->new({ directory => ['t/tpl'] });
+    my $tt = Template::Teeny->new({ include_path => ['t/tpl'] });
     my $stash = Template::Teeny::Stash->new({ title => q{Bobs Blog} });
 
     my $post1 = Template::Teeny::Stash->new({ date => 'Today', title => 'hehe' });

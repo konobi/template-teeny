@@ -4,7 +4,7 @@ use Moose;
 use Moose::Util::TypeConstraints;
 
 has vars => (is => 'rw', isa => 'HashRef', default => sub { {} });
-has _sections => (is => 'rw', isa => 'HashRef[ArrayRef[Template::Teeny::Stash]]', default => sub { {} });
+has _sections => (is => 'rw', isa => 'HashRef[ArrayRef]', default => sub { {} });
 
 sub BUILDARGS { return { vars => ($_[1]||{}) }; }
 

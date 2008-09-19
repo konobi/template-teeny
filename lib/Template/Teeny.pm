@@ -11,9 +11,9 @@ END
 
 use Moose;
 
-has directory => (
+has include_path => (
     is => 'rw',
-    isa => 'ArrayRef',
+    isa => 'ArrayRef[Str]',
     required => 1,
     lazy => 1,
     default => sub { [qw(.)] },
@@ -228,7 +228,7 @@ sub _get_tpl_str {
     my ($self, $tpl) = @_;
 
     my $tpl_str = '';
-    my @dirs_to_try = @{ $self->directory };
+    my @dirs_to_try = @{ $self->include_path };
 
     my $file;
     while(my $dir = shift @dirs_to_try){
@@ -269,7 +269,7 @@ our $VERSION = '0.00_001';
     use Template::Teeny;
 
     my $tt = Template::Teeny->new({
-        directory => ['foo/templates']    
+        include_path => ['foo/templates']    
     });
 
     my $stash = Template::Teeny->new({
