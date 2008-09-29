@@ -27,7 +27,7 @@ basic: {
     }
 
     print "Very simple interpolation:\n";
-    cmpthese( 10_000, { teeny => \&teeny, template_toolkit => \&plain });
+    cmpthese( 100_000, { teeny => \&teeny, template_toolkit => \&plain });
 }
 
 some_looping_etc: {
@@ -61,7 +61,7 @@ some_looping_etc: {
     }
 
     print "\nLoop and interpolation:\n";
-    cmpthese( 10_000, { teeny => \&teeny2, template_toolkit => \&plain2 });
+    cmpthese( 100_000, { teeny => \&teeny2, template_toolkit => \&plain2 });
 }
 
 

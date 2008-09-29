@@ -207,12 +207,13 @@ sub process {
     }
 
     my $tpl_str = '';
-    if(!ref $tpl){
-        $tpl_str .= $self->_get_tpl_str($tpl);
-    }
-
+    
     # XXX - This should really take the full name
     my $compile = $compiled_tpls->{ $tpl } ||= do {
+        if(!ref $tpl){
+            $tpl_str .= $self->_get_tpl_str($tpl);
+        }
+
         my $AST = $self->parse($tpl_str);
         $AST = $self->_optimize($AST);
         my $code_str = $self->compile($AST);
