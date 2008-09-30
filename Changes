@@ -1,5 +1,15 @@
-Revision history for Template-Teeny
+# Revision history for Template-Teeny
 
-0.00_001    XXXX-XX-XX XX:XX:XX
-	    First version, released on an unsuspecting world.
+'0.00_002':    
+    release_date: 2008-09-29
+    changes:
+        - Fix some documentation bugs
+        - Fix a very obvious performance bottleneck
+    type: recommended
+    impact: none
+
+'0.00_001':
+    release_date: 2008-09-19
+    changes:
+        - First version, released on an unsuspecting world.
 
