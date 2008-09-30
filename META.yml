@@ -21,6 +21,7 @@ no_index:
     - examples
 requires:
   Moose: 0.57
-version: 0.00_001
+version: 0.00_002
 resources:
   repository: http://github.com/konobi/template-teeny/
+

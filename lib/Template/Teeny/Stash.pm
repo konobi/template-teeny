@@ -67,6 +67,12 @@ This adds a stash to the named section.
 
 This returns the stashes that have been added to the named section.
 
+=head2 vars
+
+  $stash->vars();
+
+This is an accessor for the variables associated with this stash.
+
 =head2 BUILDARGS
 
 This is a moose thang.
