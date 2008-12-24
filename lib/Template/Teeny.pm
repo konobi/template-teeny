@@ -34,7 +34,7 @@ my $CHUNKS = qr{
 }msx;
 
 my $IDENT = qr{
-    [a-z][a-z0-9_]+ # any alphanumeric characters and underscores, but must start
+    [a-z][a-z0-9_]* # any alphanumeric characters and underscores, but must start
                     # with a letter; everything must be lower case
 }x;
 
